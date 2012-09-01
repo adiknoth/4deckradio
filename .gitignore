@@ -1,0 +1,17 @@
+simpleplayer/CMakeCache.txt
+simpleplayer/CMakeFiles/
+simpleplayer/CMakeTmp/
+simpleplayer/CTestTestfile.cmake
+simpleplayer/Makefile
+simpleplayer/cmake_install.cmake
+simpleplayer/cmake_uninstall.cmake
+simpleplayer/tutorial2
+simpleplayer/tutorial2.shell
+simpleplayer/tutorial2_automoc.cpp
+simpleplayer/tutorial2_automoc.cpp.files
+simpleplayer/main.moc
+qmusicplayer/main.o
+qmusicplayer/mainwindow.o
+qmusicplayer/moc_mainwindow.cpp
+qmusicplayer/moc_mainwindow.o
+qmusicplayer/qmusicplayer

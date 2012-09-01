@@ -117,7 +117,8 @@ void MainWindow::file_selected(const QItemSelection& selection) {
         QFileSystemModel *model = (QFileSystemModel*) tree->model();
         int row = -1;
         foreach (QModelIndex index, list) {
-                if (index.row()!=row && index.column()==0)
+                if (index.row()!=row && index.column()==0 &&
+				!model->isDir(index))
                 {
                         QString filename = model->filePath(index);
                         qDebug() << filename;

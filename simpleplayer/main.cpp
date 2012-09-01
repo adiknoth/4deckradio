@@ -112,7 +112,6 @@ void MainWindow::totalTimeUpdate(qint64 time) {
 }
 
 void MainWindow::file_selected(const QItemSelection& selection) {
-        media->stop();
         QModelIndexList list = selection.indexes();
         QFileSystemModel *model = (QFileSystemModel*) tree->model();
         int row = -1;
@@ -123,6 +122,7 @@ void MainWindow::file_selected(const QItemSelection& selection) {
                         QString filename = model->filePath(index);
                         qDebug() << filename;
                         row = index.row();
+                        media->stop();
                         media->setCurrentSource(filename);
                         media->play();
                 }

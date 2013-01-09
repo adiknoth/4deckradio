@@ -6,13 +6,13 @@ Multi-deck media playback for radio stations
 Still very early development
 
 Prerequisites:
-    - cmake
-    - qt4 development package (whatever this is)
-    - phonon (probably included in your qt4 installation)
+  * gstreamer-1.0 (development packages)
+  * GTK-3.x (development packages)
+  * [jackd](http://jackaudio.org)
+  * make
 
 Compile:
-    cd simpleplayer
-    cmake . && make
+    `cd gstreamer && make`
     
 Run:
-    ./tutorial2 /path/to/some/mediafiles/
+    `./4deckradio`

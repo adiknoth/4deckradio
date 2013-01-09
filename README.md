@@ -3,6 +3,8 @@
 
 Multi-deck media playback for radio stations
 
+![Screenshot](http://adiknoth.github.com/4deckradio/images/4deckradio.png)
+
 Still very early development
 
 Prerequisites:

@@ -407,7 +407,7 @@ static GtkWidget* init_player(CustomData *data, guint decknumber, int autoconnec
     return playerUI;
 }
 
-static gboolean handle_keyboard (GIOChannel *source, GIOCondition cond, CustomData *data) {
+static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomData *data) {
     gunichar unichar;
 
     if (g_io_channel_read_unichar (source, &unichar, NULL) != G_IO_STATUS_NORMAL) {
@@ -420,6 +420,34 @@ static gboolean handle_keyboard (GIOChannel *source, GIOCondition cond, CustomDa
     return TRUE;
 }
 
+static void keyboard_handler(CustomData *data) {
+    g_print ("Keyboard interaction, calling handler\n");
+    playpause_cb(NULL, data);
+}
+
+static void create_hotkeys(GtkWidget *main_window, CustomData *data) {
+    GtkAccelGroup *accelgroup;
+
+    accelgroup = gtk_accel_group_new();
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+        GClosure *keycallback;
+        guint accelkey;
+        GdkModifierType accelmod;
+        gchar *hotkey = g_strdup_printf("F%u", 9 + i);
+
+        gtk_accelerator_parse (hotkey, &accelkey, &accelmod);
+        g_free (hotkey);
+
+        keycallback = g_cclosure_new_swap (G_CALLBACK (keyboard_handler), &data[i], NULL);
+
+        gtk_accel_group_connect(accelgroup, accelkey, accelmod, 0, keycallback);
+        g_closure_unref(keycallback);
+
+    }
+
+    gtk_window_add_accel_group (GTK_WINDOW (main_window), accelgroup);
+}
 
 
 int main(int argc, char *argv[]) {
@@ -508,13 +536,14 @@ int main(int argc, char *argv[]) {
         audio_pause_player(&data[i]);
     }
 
+#if 0
     /* Add a keyboard watch so we get notified of keystrokes */
 #ifdef _WIN32
     io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
 #else
     io_stdin = g_io_channel_unix_new (fileno (stdin));
 #endif
-    g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc)handle_keyboard, &data);
+    g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc)socket_handler, &data);
 
     {
         const gchar *channelencoding = g_io_channel_get_encoding(io_stdin);
@@ -523,12 +552,16 @@ int main(int argc, char *argv[]) {
             g_print ("Warning: terminal encoding is not UTF-8. This may be a problem.\n");
         }
     }
+#endif
 
+    create_hotkeys(main_window, data);
 
     /* Start the GTK main loop. We will not regain control until gtk_main_quit is called. */
     gtk_main ();
 
+#if 0
     g_io_channel_unref (io_stdin);
+#endif
 
     /* Free resources */
     for (int i=0; i < NUM_PLAYERS; i++) {

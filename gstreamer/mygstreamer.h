@@ -24,7 +24,6 @@ typedef struct _CustomData {
     GtkWidget *taglabel;
     GtkWidget *timelabel;
     GtkWidget *playPauseButton;
-    GtkWidget *playPauseImage;
     GtkWidget *filechooser;
     gulong slider_update_signal_id; /* Signal ID for the slider update signal */
 

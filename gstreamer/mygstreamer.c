@@ -175,12 +175,8 @@ static GtkWidget* create_player_ui (CustomData *data) {
 
     myGrid = gtk_grid_new();
 
-    data->playPauseButton = gtk_button_new ();
+    data->playPauseButton = _create_media_button (GTK_STOCK_MEDIA_PAUSE);
     g_signal_connect (G_OBJECT (data->playPauseButton), "clicked", G_CALLBACK (playpause_cb), data);
-
-    data->playPauseImage = gtk_image_new_from_stock (GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_BUTTON);
-
-    gtk_button_set_image (GTK_BUTTON (data->playPauseButton), data->playPauseImage);
 
     stop_button = _create_media_button (GTK_STOCK_MEDIA_STOP);
     g_signal_connect (G_OBJECT (stop_button), "clicked", G_CALLBACK (stop_cb), data);
@@ -325,6 +321,12 @@ static void eos_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
     audio_stop_player (data);
 }
 
+static void _set_playPauseImage (CustomData *data, const gchar *stockid) {
+        gtk_image_set_from_stock(
+                        GTK_IMAGE (gtk_button_get_image (GTK_BUTTON (data->playPauseButton))),
+                        stockid, GTK_ICON_SIZE_BUTTON);
+}
+
 /* This function is called when the pipeline changes states. We use it to
  * keep track of the current state. */
 static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
@@ -336,11 +338,9 @@ static void state_changed_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
 
         /* update playPauseImage */
         if (data->state == GST_STATE_PAUSED || data->state == GST_STATE_READY) {
-            gtk_image_set_from_stock(GTK_IMAGE (data->playPauseImage),
-                    GTK_STOCK_MEDIA_PLAY, GTK_ICON_SIZE_BUTTON);
+                _set_playPauseImage(data, GTK_STOCK_MEDIA_PLAY);
         } else {
-            gtk_image_set_from_stock(GTK_IMAGE (data->playPauseImage),
-                    GTK_STOCK_MEDIA_PAUSE, GTK_ICON_SIZE_BUTTON);
+                _set_playPauseImage(data, GTK_STOCK_MEDIA_PAUSE);
         }
 
         if (old_state == GST_STATE_READY && new_state == GST_STATE_PAUSED) {

@@ -163,12 +163,6 @@ static void quit_all (CustomData *data) {
     gtk_widget_destroy (dialog);
 }
 
-static void quit_cb (GtkButton *button, CustomData *data) {
-    stop_cb (NULL, data);
-    gtk_main_quit ();
-}
-
-
 /* This function is called when the main window is closed */
 static void delete_event_cb (GtkWidget *widget, GdkEvent *event, void *argp) {
     gtk_main_quit ();

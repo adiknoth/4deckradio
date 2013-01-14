@@ -202,7 +202,6 @@ static GtkWidget* _create_media_button (const gchar *stockid) {
 /* This creates all the GTK+ widgets that compose our application, and registers the callbacks */
 static GtkWidget* create_player_ui (CustomData *data) {
     GtkWidget *stop_button; /* Buttons */
-    GtkWidget *quit_button;
     GtkWidget *myGrid;
 
 
@@ -213,9 +212,6 @@ static GtkWidget* create_player_ui (CustomData *data) {
 
     stop_button = _create_media_button (GTK_STOCK_MEDIA_STOP);
     g_signal_connect (G_OBJECT (stop_button), "clicked", G_CALLBACK (stop_cb), data);
-
-    quit_button = _create_media_button (GTK_STOCK_QUIT);
-    g_signal_connect (G_OBJECT (quit_button), "clicked", G_CALLBACK (quit_cb), data);
 
     data->slider = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);
     gtk_scale_set_draw_value (GTK_SCALE (data->slider), 0);
@@ -249,7 +245,6 @@ static GtkWidget* create_player_ui (CustomData *data) {
     gtk_grid_attach (GTK_GRID (myGrid), data->filechooser, 0, 0, 1, 3);
     gtk_grid_attach_next_to (GTK_GRID (myGrid), data->playPauseButton, data->filechooser, GTK_POS_RIGHT, 1, 1);
     gtk_grid_attach_next_to (GTK_GRID (myGrid), stop_button, data->playPauseButton, GTK_POS_BOTTOM, 1, 1);
-    gtk_grid_attach_next_to (GTK_GRID (myGrid), quit_button, stop_button, GTK_POS_BOTTOM, 1, 1);
 
     gtk_grid_attach_next_to (GTK_GRID (myGrid), data->taglabel, data->filechooser, GTK_POS_BOTTOM, 2, 1);
     gtk_grid_attach_next_to (GTK_GRID (myGrid), data->timelabel, data->taglabel, GTK_POS_BOTTOM, 2, 1);

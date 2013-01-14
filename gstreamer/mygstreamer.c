@@ -155,6 +155,17 @@ static void slider_cb (GtkRange *range, CustomData *data) {
             (gint64)(value * GST_SECOND));
 }
 
+/* Creates a button with an icon but no text */
+static GtkWidget* _create_media_button (const gchar *stockid) {
+        GtkWidget *button = gtk_button_new();
+
+        gtk_button_set_image (GTK_BUTTON (button),
+                        gtk_image_new_from_stock (stockid,
+                                GTK_ICON_SIZE_BUTTON));
+
+        return button;
+}
+
 /* This creates all the GTK+ widgets that compose our application, and registers the callbacks */
 static GtkWidget* create_player_ui (CustomData *data) {
     GtkWidget *stop_button; /* Buttons */
@@ -171,10 +182,10 @@ static GtkWidget* create_player_ui (CustomData *data) {
 
     gtk_button_set_image (GTK_BUTTON (data->playPauseButton), data->playPauseImage);
 
-    stop_button = gtk_button_new_from_stock (GTK_STOCK_MEDIA_STOP);
+    stop_button = _create_media_button (GTK_STOCK_MEDIA_STOP);
     g_signal_connect (G_OBJECT (stop_button), "clicked", G_CALLBACK (stop_cb), data);
 
-    quit_button = gtk_button_new_from_stock (GTK_STOCK_QUIT);
+    quit_button = _create_media_button (GTK_STOCK_QUIT);
     g_signal_connect (G_OBJECT (quit_button), "clicked", G_CALLBACK (quit_cb), data);
 
     data->slider = gtk_scale_new_with_range (GTK_ORIENTATION_HORIZONTAL, 0, 100, 1);

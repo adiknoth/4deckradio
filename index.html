@@ -42,12 +42,19 @@
 <p>Prerequisites:</p>
 
 <ul>
-<li>gstreamer-1.0 (development packages)</li>
+<li>gstreamer-1.0 or 0.10 (development packages)</li>
 <li>GTK-3.x (development packages)</li>
 <li><a href="http://jackaudio.org">jackd</a></li>
 <li>make</li>
 </ul><p>Compile:
+<ul>
+    <li>For gstreamer-1.0, run
     <code>cd gstreamer &amp;&amp; make</code></p>
+    </li>
+
+    <li>For gstreamer-0.10, run
+    <code>cd gstreamer &amp;&amp; make OLDGSTREAMER=1</code></p>
+    <li>
 
 <p>Run:
     <code>./4deckradio</code></p>

@@ -130,6 +130,39 @@ static void stop_cb (GtkButton *button, CustomData *data) {
     audio_stop_player (data);
 }
 
+static void quit_all (CustomData *data) {
+    GtkWidget *dialog;
+
+    gboolean all_in_readystate = TRUE;
+
+    for (int i = 0; i < NUM_PLAYERS; i++) {
+            all_in_readystate = all_in_readystate && (GST_STATE_READY == data[i].state);
+    }
+
+    if (all_in_readystate) {
+            dialog = gtk_message_dialog_new (GTK_WINDOW (data[0].mainwindow),
+                            GTK_DIALOG_DESTROY_WITH_PARENT,
+                            GTK_MESSAGE_QUESTION,
+                            GTK_BUTTONS_YES_NO,
+                            "Really quit?");
+    } else {
+            dialog = gtk_message_dialog_new (GTK_WINDOW (data[0].mainwindow),
+                            GTK_DIALOG_DESTROY_WITH_PARENT,
+                            GTK_MESSAGE_INFO,
+                            GTK_BUTTONS_OK,
+                            "Won't quit while playing. Stop all players first.");
+    }
+    gint result = gtk_dialog_run (GTK_DIALOG (dialog));
+    switch (result) {
+    case GTK_RESPONSE_YES:
+            gtk_main_quit();
+            break;
+    default:
+            break;
+    }
+    gtk_widget_destroy (dialog);
+}
+
 static void quit_cb (GtkButton *button, CustomData *data) {
     stop_cb (NULL, data);
     gtk_main_quit ();
@@ -436,26 +469,36 @@ static void keyboard_handler(CustomData *data) {
     playpause_cb(NULL, data);
 }
 
+static void _add_hotkey (const gchar *hotkey, GtkAccelGroup *accelgroup,
+                GCallback callback, gpointer user_data) {
+        GClosure *keycallback;
+        guint accelkey;
+        GdkModifierType accelmod;
+
+        gtk_accelerator_parse (hotkey, &accelkey, &accelmod);
+
+        keycallback = g_cclosure_new_swap (callback, user_data, NULL);
+
+        gtk_accel_group_connect(accelgroup, accelkey, accelmod, 0, keycallback);
+        g_closure_unref(keycallback);
+}
+
+
 static void create_hotkeys(GtkWidget *main_window, CustomData *data) {
     GtkAccelGroup *accelgroup;
 
     accelgroup = gtk_accel_group_new();
 
     for (int i = 0; i < NUM_PLAYERS; i++) {
-        GClosure *keycallback;
-        guint accelkey;
-        GdkModifierType accelmod;
         gchar *hotkey = g_strdup_printf("F%u", 9 + i);
 
-        gtk_accelerator_parse (hotkey, &accelkey, &accelmod);
+        _add_hotkey (hotkey, accelgroup, G_CALLBACK (keyboard_handler), &data[i]);
         g_free (hotkey);
-
-        keycallback = g_cclosure_new_swap (G_CALLBACK (keyboard_handler), &data[i], NULL);
-
-        gtk_accel_group_connect(accelgroup, accelkey, accelmod, 0, keycallback);
-        g_closure_unref(keycallback);
-
     }
+
+    /* Bind the quit_all callback to ctrl-q */
+    _add_hotkey ("<Control>q", accelgroup, G_CALLBACK (quit_all), data);
+
 
     gtk_window_add_accel_group (GTK_WINDOW (main_window), accelgroup);
 }
@@ -515,6 +558,7 @@ int main(int argc, char *argv[]) {
 
     for (int i=0; i < NUM_PLAYERS; i++) {
         GtkWidget *playerUI = init_player (&data[i], i, autoconnect);
+        data[i].mainwindow = main_window;
 
         /* two columns (i%2) in (i/2) rows */
         gtk_grid_attach (GTK_GRID (main_grid), playerUI, i % 2, i / 2, 1, 1);

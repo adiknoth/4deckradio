@@ -270,7 +270,11 @@ static gboolean refresh_ui (CustomData *data) {
 
     /* If we didn't know it yet, query the stream duration */
     if (!GST_CLOCK_TIME_IS_VALID (data->duration)) {
+#if GST_VERSION_MAJOR == (0)
+        if (!gst_element_query_duration (data->pipeline, &fmt, &data->duration)) {
+#else
         if (!gst_element_query_duration (data->pipeline, fmt, &data->duration)) {
+#endif
             g_printerr ("Could not query current duration.\n");
         } else {
             /* Set the range of the slider to the clip duration, in SECONDS */
@@ -278,7 +282,11 @@ static gboolean refresh_ui (CustomData *data) {
         }
     }
 
+#if GST_VERSION_MAJOR == (0)
+    if (gst_element_query_position (data->pipeline, &fmt, &current)) {
+#else
     if (gst_element_query_position (data->pipeline, fmt, &current)) {
+#endif
         /* Block the "value-changed" signal, so the slider_cb function is not called
          * (which would trigger a seek the user has not requested) */
         g_signal_handler_block (data->slider, data->slider_update_signal_id);
@@ -396,7 +404,11 @@ static void tag_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
         g_free(artist);
         g_free(tagstring);
 
+#if GST_VERSION_MAJOR == (0)
+        gst_tag_list_free (tags);
+#else
         gst_tag_list_unref (tags);
+#endif
     }
 }
 

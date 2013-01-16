@@ -504,6 +504,56 @@ static void create_hotkeys(GtkWidget *main_window, CustomData *data) {
     gtk_window_add_accel_group (GTK_WINDOW (main_window), accelgroup);
 }
 
+static gchar *dummyuri(void) {
+        return g_strdup_printf ("file:///");
+}
+
+static gchar* make_silence(void) {
+        const gchar silentwave[] = {0x52, 0x49, 0x46, 0x46, 0x24, 0x00, 0x00, 0x00, 0x57,
+                0x41, 0x56, 0x45, 0x66, 0x6D, 0x74, 0x20, 0x10, 0x00, 0x00, 0x00,
+                0x01, 0x00, 0x02, 0x00, 0x80, 0xBB, 0x00, 0x00, 0x00, 0xEE, 0x02,
+                0x00, 0x04, 0x00, 0x10, 0x00, 0x64, 0x61, 0x74, 0x61, 0x00, 0x00,
+                0x00, 0x00};
+        GError *error;
+        gchar *tmpfilename;
+        gchar *ret;
+        GIOChannel *outfile;
+        gsize bytes_written;
+
+        error = NULL;
+        gint fd = g_file_open_tmp (NULL, &tmpfilename, &error);
+
+        if (-1 == fd) {
+                g_print ("Unable to create tmp file: %s\n", error->message);
+                g_error_free (error);
+                return dummyuri();
+        }
+
+        outfile = g_io_channel_unix_new (fd);
+
+        /* make it a binary channel */
+        if (G_IO_STATUS_NORMAL != g_io_channel_set_encoding (outfile, NULL, NULL)) {
+                g_print ("Unable to create tmpfile in binary mode\n");
+                return dummyuri();
+        }
+
+        g_print ("File is %d\n", sizeof(*silentwave));
+
+        error = NULL;
+        if (G_IO_STATUS_NORMAL != g_io_channel_write_chars (outfile, &silentwave[0], sizeof(silentwave), &bytes_written, &error)) {
+                g_print ("Unable to write to tmpfile: %s\n", error->message);
+                g_error_free (error);
+                return dummyuri();
+        }
+
+        g_io_channel_shutdown (outfile, TRUE, NULL);
+        g_io_channel_unref (outfile);
+
+        close(fd);
+
+        return g_filename_to_uri (tmpfilename, NULL, NULL);
+}
+
 
 int main(int argc, char *argv[]) {
     CustomData data[NUM_PLAYERS];
@@ -582,14 +632,19 @@ int main(int argc, char *argv[]) {
 
     gtk_widget_show_all (main_window);
 
-    /* enable file selection signals */
-    for (int i=0; i < NUM_PLAYERS; i++) {
-        g_signal_handler_unblock (data[i].filechooser,
-                data[i].file_selection_signal_id);
-        /* ugly hack to expose the jack ports until jackaudiosink is fixed */
-        audio_set_uri(&data[i],
-                "file:///usr/share/sounds/alsa/Front_Center.wav");
-        audio_pause_player(&data[i]);
+    {
+            /* ugly hack to expose the jack ports until jackaudiosink is fixed */
+            gchar *tmpfileuri = make_silence();
+
+            /* enable file selection signals */
+            for (int i=0; i < NUM_PLAYERS; i++) {
+                    g_signal_handler_unblock (data[i].filechooser,
+                                    data[i].file_selection_signal_id);
+                    audio_set_uri(&data[i], tmpfileuri);
+                    audio_pause_player(&data[i]);
+            }
+
+            g_free (tmpfileuri);
     }
 
 #if 0

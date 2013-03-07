@@ -449,7 +449,6 @@ static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomDat
 #define JS_EVENT_INIT           0x80    /* initial state of device */
 
     int joyfd;
-    static int button_state = 0;
 
     struct js_event {
         uint32_t time;    /* event timestamp in milliseconds */
@@ -463,21 +462,14 @@ static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomDat
     read(joyfd, &e, sizeof(struct js_event));
 
     if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
-        if (e.value) {
-            button_state |= (1 << e.number);
-        } else {
-            button_state &= ~(1 << e.number);
-        }
-        g_print ("joystick event %d\n", button_state);
-
-        /* this is "press to play mode" */
-        for (int i = 0; i < NUM_PLAYERS; i++) {
-            if (button_state & (1 << i)) {
-                audio_play_player (&data[i]);
+        if (e.number < NUM_PLAYERS) {
+            if (e.value) {
+                audio_play_player (&data[e.number]);
             } else {
-                audio_pause_player (&data[i]);
+                audio_pause_player (&data[e.number]);
             }
         }
+        g_print ("joystick button %d = %d\n", e.number, e.value);
     }
 
     return TRUE;

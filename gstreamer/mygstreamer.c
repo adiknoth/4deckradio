@@ -477,7 +477,7 @@ static GtkWidget* init_player(CustomData *data, guint decknumber, int autoconnec
     return playerUI;
 }
 
-static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomData *data) {
+static gboolean joystick_handler (GIOChannel *source, GIOCondition cond, CustomData *data) {
 #define JS_EVENT_BUTTON         0x01    /* button pressed/released */
 #define JS_EVENT_AXIS           0x02    /* joystick moved */
 #define JS_EVENT_INIT           0x80    /* initial state of device */
@@ -565,7 +565,7 @@ static GIOChannel* create_joystick(CustomData *data) {
 
     g_io_channel_set_encoding (io_channel, NULL, NULL);
 
-    g_io_add_watch (io_channel, G_IO_IN | G_IO_PRI, (GIOFunc)socket_handler, data);
+    g_io_add_watch (io_channel, G_IO_IN | G_IO_PRI, (GIOFunc)joystick_handler, data);
 
     return io_channel;
 }

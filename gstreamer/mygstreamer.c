@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -5,6 +6,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <fcntl.h>
 
 
 #include <gtk/gtk.h>
@@ -442,14 +444,41 @@ static GtkWidget* init_player(CustomData *data, guint decknumber, int autoconnec
 }
 
 static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomData *data) {
-    gunichar unichar;
+#define JS_EVENT_BUTTON         0x01    /* button pressed/released */
+#define JS_EVENT_AXIS           0x02    /* joystick moved */
+#define JS_EVENT_INIT           0x80    /* initial state of device */
 
-    if (g_io_channel_read_unichar (source, &unichar, NULL) != G_IO_STATUS_NORMAL) {
-        return TRUE;
+    int joyfd;
+    static int button_state = 0;
+
+    struct js_event {
+        uint32_t time;    /* event timestamp in milliseconds */
+        int16_t value;    /* value */
+        uint8_t type;     /* event type */
+        uint8_t number;   /* axis/button number */
+    } e;
+
+    joyfd = g_io_channel_unix_get_fd(source);
+
+    read(joyfd, &e, sizeof(struct js_event));
+
+    if ((e.type & ~JS_EVENT_INIT) == JS_EVENT_BUTTON) {
+        if (e.value) {
+            button_state |= (1 << e.number);
+        } else {
+            button_state &= ~(1 << e.number);
+        }
+        g_print ("joystick event %d\n", button_state);
+
+        /* this is "press to play mode" */
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            if (button_state & (1 << i)) {
+                audio_play_player (&data[i]);
+            } else {
+                audio_pause_player (&data[i]);
+            }
+        }
     }
-
-    g_print ("key event %c\n", unichar);
-
 
     return TRUE;
 }
@@ -491,6 +520,24 @@ static void create_hotkeys(GtkWidget *main_window, CustomData *data) {
 
 
     gtk_window_add_accel_group (GTK_WINDOW (main_window), accelgroup);
+}
+
+static GIOChannel* create_joystick(CustomData *data) {
+    GIOChannel *io_channel;
+    int joyfd = open ("/dev/input/js0", O_RDONLY);
+
+    if (-1 == joyfd) {
+        perror ("Couldn't open /dev/input/js0");
+        return NULL;
+    }
+
+    io_channel = g_io_channel_unix_new (joyfd);
+
+    g_io_channel_set_encoding (io_channel, NULL, NULL);
+
+    g_io_add_watch (io_channel, G_IO_IN | G_IO_PRI, (GIOFunc)socket_handler, data);
+
+    return io_channel;
 }
 
 static gchar *dummyuri(void) {
@@ -548,7 +595,7 @@ int main(int argc, char *argv[]) {
     CustomData data[NUM_PLAYERS];
     GtkWidget *main_window;
     GtkWidget *main_grid;
-    GIOChannel *io_stdin;
+    GIOChannel *io_joystick;
 
     extern char *optarg;
     extern int optind, optopt;
@@ -636,32 +683,18 @@ int main(int argc, char *argv[]) {
             g_free (tmpfileuri);
     }
 
-#if 0
-    /* Add a keyboard watch so we get notified of keystrokes */
-#ifdef _WIN32
-    io_stdin = g_io_channel_win32_new_fd (fileno (stdin));
-#else
-    io_stdin = g_io_channel_unix_new (fileno (stdin));
-#endif
-    g_io_add_watch (io_stdin, G_IO_IN, (GIOFunc)socket_handler, &data);
-
-    {
-        const gchar *channelencoding = g_io_channel_get_encoding(io_stdin);
-        
-        if (0 != g_strcmp0("UTF-8", channelencoding)) {
-            g_print ("Warning: terminal encoding is not UTF-8. This may be a problem.\n");
-        }
-    }
-#endif
 
     create_hotkeys(main_window, data);
+
+    io_joystick = create_joystick(data);
 
     /* Start the GTK main loop. We will not regain control until gtk_main_quit is called. */
     gtk_main ();
 
-#if 0
-    g_io_channel_unref (io_stdin);
-#endif
+    if (NULL != io_joystick) {
+        g_io_channel_shutdown (io_joystick, FALSE, NULL);
+        g_io_channel_unref (io_joystick);
+    }
 
     /* Free resources */
     for (int i=0; i < NUM_PLAYERS; i++) {

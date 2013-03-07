@@ -113,17 +113,6 @@ static void file_selection_cb (GtkFileChooser *chooser, CustomData *data) {
     audio_pause_player (data);
 }
 
-
-/* This function is called when the PLAY button is clicked */
-static void play_cb (GtkButton *button, CustomData *data) {
-    gst_element_set_state (data->pipeline, GST_STATE_PLAYING);
-}
-
-/* This function is called when the PAUSE button is clicked */
-static void pause_cb (GtkButton *button, CustomData *data) {
-    gst_element_set_state (data->pipeline, GST_STATE_PAUSED);
-}
-
 /* This function is called when the STOP button is clicked */
 static void stop_cb (GtkButton *button, CustomData *data) {
     update_timelabel(data, "Stopped");

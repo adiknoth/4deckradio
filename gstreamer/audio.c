@@ -17,6 +17,10 @@ GstStateChangeReturn audio_pause_player (CustomData *data) {
     return _change_state (data, GST_STATE_PAUSED);
 }
 
+GstStateChangeReturn audio_play_player (CustomData *data) {
+    return _change_state (data, GST_STATE_PLAYING);
+}
+
 static void pad_added_handler (GstElement *src, GstPad *new_pad, CustomData *data) {
     GstPad *sink_pad = gst_element_get_static_pad (data->audioconvert, "sink");
     GstPadLinkReturn ret;

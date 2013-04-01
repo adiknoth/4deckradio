@@ -289,7 +289,8 @@ static gboolean refresh_ui (CustomData *data) {
             gchar *time;
             GstClockTimeDiff remaining = data->duration-current;
 
-            time = g_strdup_printf("-%" HMS_TIME_FORMAT " / %" HMS_TIME_FORMAT,
+            time = g_strdup_printf("%" HMS_TIME_FORMAT " / -%" HMS_TIME_FORMAT " / %" HMS_TIME_FORMAT,
+                    HMS_TIME_ARGS(current),
                     HMS_TIME_ARGS(remaining),
                     HMS_TIME_ARGS(data->duration));
 
@@ -300,7 +301,7 @@ static gboolean refresh_ui (CustomData *data) {
                     update_timelabel_bg (data, time, "yellow");
                 }
             } else {
-                update_timelabel (data, time);
+                update_timelabel_bg (data, time, "green");
             }
 
             g_free (time);

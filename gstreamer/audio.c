@@ -81,6 +81,11 @@ void audio_set_uri(CustomData *data, const gchar *uri) {
     g_object_set (data->uridecodebin, "uri", uri, NULL);
 }
 
+void audio_seek(CustomData *data, gdouble value) {
+    gst_element_seek_simple (data->pipeline, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT,
+            (gint64)(value * GST_SECOND));
+}
+
 int init_audio(CustomData *data, guint decknumber, int autoconnect) {
     GstStateChangeReturn ret;
 

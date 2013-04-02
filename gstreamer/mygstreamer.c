@@ -169,8 +169,7 @@ static void slider_cb (GtkRange *range, CustomData *data) {
     update_timelabel(data, time);
     g_free (time);
 
-    gst_element_seek_simple (data->pipeline, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT,
-            (gint64)(value * GST_SECOND));
+    audio_seek(data, value);
 }
 
 /* Creates a button with an icon but no text */

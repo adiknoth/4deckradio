@@ -26,7 +26,6 @@
 
 #define NUM_PLAYERS 4
 
-
 static void print_usage(char *name) {
     fprintf (stderr, "usage: %s [options]\n"
             "\n"
@@ -83,6 +82,28 @@ static inline void update_taglabel(CustomData *data, const gchar *str) {
     gtk_label_set_text (GTK_LABEL (data->taglabel), str);
 }
 
+static void maybe_load_nextfile(CustomData *data) {
+    if (NULL != data->nextfile_uri) {
+        GstStateChangeReturn rc = -1;
+
+        audio_stop_player (data);
+        gchar *filename = g_filename_from_uri (data->nextfile_uri,
+                NULL, NULL);
+        update_taglabel(data, g_filename_display_basename(filename));
+        audio_set_uri (data, data->nextfile_uri);
+        data->nextfile_uri = NULL;
+        g_free (filename);
+        audio_pause_player (data);
+        while ((rc != GST_STATE_CHANGE_SUCCESS) && (rc !=
+                                GST_STATE_CHANGE_FAILURE)) {
+                GstState state;
+                rc = gst_element_get_state(data->pipeline, &state, &state,
+                                GST_CLOCK_TIME_NONE);
+        }
+    }
+    audio_pseudo_stop(data);
+}
+
 
 static void playpause_cb(GtkButton *button, CustomData *data) {
     if (data->state == GST_STATE_PLAYING) {
@@ -104,12 +125,21 @@ static void file_selection_cb (GtkFileChooser *chooser, CustomData *data) {
         return;
     }
 
+    if (audio_is_playing(data)) {
+            /* Don't load the file, only store its filename in
+             * data->nextfile_uri, so it is loaded when the pipe finishes
+             */
+            g_print ("Next file URI: %s\n", fileURI);
+            data->nextfile_uri = fileURI;
+            return;
+    }
+
+
     audio_stop_player (data);
     g_print ("File URI: %s\n", fileURI);
     update_taglabel(data, g_filename_display_basename(fileName));
 
     audio_set_uri (data, fileURI);
-    data->duration = GST_CLOCK_TIME_NONE;
 
     /* load new file by putting the player into pause state */
     audio_pause_player (data);
@@ -117,8 +147,13 @@ static void file_selection_cb (GtkFileChooser *chooser, CustomData *data) {
 
 /* This function is called when the STOP button is clicked */
 static void stop_cb (GtkButton *button, CustomData *data) {
-    update_timelabel(data, "Stopped");
-    audio_stop_player (data);
+    if (audio_is_playing(data)) {
+        maybe_load_nextfile (data);
+    } else {
+        /* real stop */
+        update_timelabel(data, "Stopped");
+        audio_stop_player (data);
+    }
 }
 
 static void quit_all (CustomData *data) {
@@ -338,8 +373,7 @@ static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
  * We just set the pipeline to READY (which stops playback) */
 static void eos_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
     g_print ("End-Of-Stream reached.\n");
-    update_timelabel(data, "Finished");
-    audio_stop_player (data);
+    maybe_load_nextfile (data);
 }
 
 static void _set_playPauseImage (CustomData *data, const gchar *stockid) {
@@ -466,7 +500,7 @@ static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomDat
             if (e.value) {
                 audio_play_player (&data[e.number]);
             } else {
-                audio_pause_player (&data[e.number]);
+                stop_cb (NULL, &data[e.number]);
             }
         }
         g_print ("joystick button %d = %d\n", e.number, e.value);
@@ -477,7 +511,11 @@ static gboolean socket_handler (GIOChannel *source, GIOCondition cond, CustomDat
 
 static void keyboard_handler(CustomData *data) {
     g_print ("Keyboard interaction, calling handler\n");
-    playpause_cb(NULL, data);
+    if (audio_is_playing(data)) {
+        stop_cb (NULL, data);
+    } else {
+        audio_play_player (data);
+    }
 }
 
 static void _add_hotkey (const gchar *hotkey, GtkAccelGroup *accelgroup,

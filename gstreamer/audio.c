@@ -79,11 +79,22 @@ static GstElement* create_gst_element (const gchar *what, const gchar *name) {
 
 void audio_set_uri(CustomData *data, const gchar *uri) {
     g_object_set (data->uridecodebin, "uri", uri, NULL);
+    data->duration = GST_CLOCK_TIME_NONE;
 }
 
-void audio_seek(CustomData *data, gdouble value) {
-    gst_element_seek_simple (data->pipeline, GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT,
+gboolean audio_seek(CustomData *data, gdouble value) {
+    return gst_element_seek_simple (data->pipeline,
+            GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT,
             (gint64)(value * GST_SECOND));
+}
+
+inline gboolean audio_is_playing(CustomData *data) {
+    return (data->state == GST_STATE_PLAYING);
+}
+
+void audio_pseudo_stop(CustomData *data) {
+    audio_seek (data, 0.0);
+    audio_pause_player (data);
 }
 
 int init_audio(CustomData *data, guint decknumber, int autoconnect) {

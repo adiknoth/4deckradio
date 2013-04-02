@@ -26,6 +26,8 @@ typedef struct _CustomData {
     GtkWidget *playPauseButton;
     GtkWidget *filechooser;
     GtkWidget *mainwindow;
+
+    gchar *nextfile_uri;            /* URI of the next audio file/URL to play */
     gulong slider_update_signal_id; /* Signal ID for the slider update signal */
 
     gulong file_selection_signal_id;

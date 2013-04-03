@@ -344,14 +344,18 @@ static gboolean refresh_ui (CustomData *data) {
                     HMS_TIME_ARGS(remaining),
                     HMS_TIME_ARGS(data->duration));
 
-            if (remaining < 0.5 * data->duration) {
-                if (remaining < 0.25 * data->duration) {
-                    update_timelabel_bg (data, time, "red");
-                } else {
-                    update_timelabel_bg (data, time, "yellow");
-                }
+            if (!audio_is_playing(data)) {
+                update_timelabel (data, time);
             } else {
-                update_timelabel_bg (data, time, "green");
+                if (remaining < 0.5 * data->duration) {
+                    if (remaining < 0.25 * data->duration) {
+                        update_timelabel_bg (data, time, "red");
+                    } else {
+                        update_timelabel_bg (data, time, "yellow");
+                    }
+                } else {
+                    update_timelabel_bg (data, time, "green");
+                }
             }
 
             g_free (time);

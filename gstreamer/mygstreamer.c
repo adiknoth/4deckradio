@@ -754,6 +754,10 @@ int main(int argc, char *argv[]) {
     /* Load config */
     load_configfile(data);
 
+
+    gtk_grid_set_row_spacing (GTK_GRID (main_grid), 30);
+    gtk_grid_set_column_spacing (GTK_GRID (main_grid), 30);
+
     for (int i=0; i < NUM_PLAYERS; i++) {
         GtkWidget *playerUI = init_player (&data[i], i, autoconnect);
         data[i].mainwindow = main_window;

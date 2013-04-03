@@ -337,8 +337,8 @@ static gboolean refresh_ui (CustomData *data) {
                     HMS_TIME_ARGS(remaining),
                     HMS_TIME_ARGS(data->duration));
 
-            if (remaining < 15 * GST_SECOND) {
-                if (remaining < 5 * GST_SECOND) {
+            if (remaining < 0.5 * data->duration) {
+                if (remaining < 0.25 * data->duration) {
                     update_timelabel_bg (data, time, "red");
                 } else {
                     update_timelabel_bg (data, time, "yellow");

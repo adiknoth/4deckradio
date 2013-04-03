@@ -595,7 +595,7 @@ static gchar* make_silence(void) {
         GIOChannel *outfile;
         gsize bytes_written;
 
-        error = NULL;
+        g_clear_error (&error);
         gint fd = g_file_open_tmp (NULL, &tmpfilename, &error);
 
         if (-1 == fd) {
@@ -614,7 +614,7 @@ static gchar* make_silence(void) {
 
         g_print ("File is %d\n", sizeof(*silentwave));
 
-        error = NULL;
+        g_clear_error (&error);
         if (G_IO_STATUS_NORMAL != g_io_channel_write_chars (outfile, &silentwave[0], sizeof(silentwave), &bytes_written, &error)) {
                 g_print ("Unable to write to tmpfile: %s\n", error->message);
                 g_error_free (error);

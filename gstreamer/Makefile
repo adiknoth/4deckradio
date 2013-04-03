@@ -10,7 +10,7 @@ GSTREAMER_FLAGS = `pkg-config --libs --cflags ${GSTREAMER}`
 
 MY_INCLUDES = ${GSTREAMER_FLAGS} `pkg-config --libs --cflags gtk+-3.0`
 
-%.o: %.c %.h
+%.o: %.c *.h
 	gcc -g -std=c99 -c $< ${MY_INCLUDES} -D_POSIX_C_SOURCE=200809L
 
 4deckradio: mygstreamer.o audio.o

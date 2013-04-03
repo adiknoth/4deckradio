@@ -121,6 +121,8 @@ static void file_selection_cb (GtkFileChooser *chooser, CustomData *data) {
         return;
     }
 
+    data->last_folder_uri = gtk_file_chooser_get_current_folder_uri (chooser);
+
     if (g_file_test(fileName, G_FILE_TEST_IS_DIR)) {
         return;
     }
@@ -245,7 +247,14 @@ static GtkWidget* create_player_ui (CustomData *data) {
         gtk_file_chooser_set_local_only (GTK_FILE_CHOOSER (data->filechooser), TRUE);
         gtk_file_chooser_set_select_multiple (GTK_FILE_CHOOSER (data->filechooser), FALSE);
         gtk_file_chooser_set_use_preview_label (GTK_FILE_CHOOSER (data->filechooser), FALSE);
-        gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (data->filechooser), getenv("HOME"));
+
+        if (NULL != data->last_folder_uri) {
+            gtk_file_chooser_set_current_folder_uri (GTK_FILE_CHOOSER (data->filechooser),
+                    data->last_folder_uri);
+        } else {
+            gtk_file_chooser_set_current_folder (GTK_FILE_CHOOSER (data->filechooser),
+                    g_get_home_dir());
+        }
 
         GtkFileFilter *filter = gtk_file_filter_new();
 

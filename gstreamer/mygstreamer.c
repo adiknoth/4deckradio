@@ -312,7 +312,9 @@ static gboolean refresh_ui (CustomData *data) {
             g_printerr ("Could not query current duration.\n");
         } else {
             /* Set the range of the slider to the clip duration, in SECONDS */
+            g_signal_handler_block (data->slider, data->slider_update_signal_id);
             gtk_range_set_range (GTK_RANGE (data->slider), 0, (gdouble)data->duration / GST_SECOND);
+            g_signal_handler_unblock (data->slider, data->slider_update_signal_id);
         }
     }
 

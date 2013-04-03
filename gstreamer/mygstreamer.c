@@ -735,6 +735,29 @@ int main(int argc, char *argv[]) {
         g_io_channel_unref (io_joystick);
     }
 
+    /* Save the last folder locations to ~/.4deckradio */
+    {
+        gchar *filename = g_strdup_printf("file://%s/.4deckradio", g_get_home_dir());
+        g_print ("config file: %s\n", filename);
+        GFile *file = g_file_new_for_uri (filename);
+        GString *configstring = g_string_new("");
+        for (int i=0; i < NUM_PLAYERS; i++) {
+            g_print ("deck %i folder %s\n", i, data[i].last_folder_uri);
+            g_string_append_printf (configstring, "%s\n", data[i].last_folder_uri);
+        }
+
+        g_file_replace_contents (file,
+                configstring->str,
+                configstring->len,
+                NULL, /* old etag */
+                FALSE, /* backup */
+                G_FILE_CREATE_PRIVATE,
+                NULL, /* new etag */
+                NULL, /* cancellable */
+                NULL);
+        g_free (filename);
+    }
+
     /* Free resources */
     for (int i=0; i < NUM_PLAYERS; i++) {
         gst_element_set_state (data[i].pipeline, GST_STATE_NULL);

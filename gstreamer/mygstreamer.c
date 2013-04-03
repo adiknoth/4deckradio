@@ -629,6 +629,75 @@ static gchar* make_silence(void) {
         return g_filename_to_uri (tmpfilename, NULL, NULL);
 }
 
+static void _configfile (CustomData *data, gboolean writemode) {
+    gchar *filename = g_strdup_printf("file://%s/.4deckradio", g_get_home_dir());
+    g_print ("config file: %s\n", filename);
+    GFile *file = g_file_new_for_uri (filename);
+
+    if (TRUE == writemode) {
+        /* Save the last folder locations to ~/.4deckradio */
+        GString *configstring = g_string_new("");
+        for (int i=0; i < NUM_PLAYERS; i++) {
+            g_print ("deck %i folder %s\n", i, data[i].last_folder_uri);
+            g_string_append_printf (configstring, "%s\n", data[i].last_folder_uri);
+        }
+
+        g_file_replace_contents (file,
+                configstring->str,
+                configstring->len,
+                NULL, /* old etag */
+                FALSE, /* backup */
+                G_FILE_CREATE_PRIVATE,
+                NULL, /* new etag */
+                NULL, /* cancellable */
+                NULL);
+        g_string_free (configstring, TRUE);
+    } else {
+        /* load config file */
+        GFileInputStream *inputstream = g_file_read (file,
+                NULL,
+                NULL);
+        if (NULL == inputstream) {
+            return;
+        }
+
+        GDataInputStream *config = g_data_input_stream_new (G_INPUT_STREAM (inputstream));
+
+        if (NULL == config) {
+            return;
+        }
+
+
+        GError *error = NULL;
+
+        for (int i = 0; i < NUM_PLAYERS; i++) {
+            gsize length;
+            data[i].last_folder_uri =
+                g_data_input_stream_read_line_utf8(config, &length, NULL, &error);
+            if (NULL != error) {
+                g_print ("Error reading config file: %s\n", error->message);
+            }
+            g_clear_error (&error);
+            g_print ("Will use %s for deck %i\n", data[i].last_folder_uri, i);
+        }
+
+        g_input_stream_close (G_INPUT_STREAM (config), NULL, NULL);
+        g_input_stream_close (G_INPUT_STREAM (inputstream), NULL, NULL);
+        g_object_unref (config);
+        g_object_unref (inputstream);
+    }
+    g_free (filename);
+    g_object_unref (file);
+}
+
+static inline void load_configfile (CustomData *data) {
+    _configfile (data, FALSE);
+}
+
+static inline void save_configfile (CustomData *data) {
+    _configfile (data, TRUE);
+}
+
 
 int main(int argc, char *argv[]) {
     CustomData data[NUM_PLAYERS];
@@ -681,6 +750,9 @@ int main(int argc, char *argv[]) {
     main_window = create_mainwindow();
 
     main_grid = gtk_grid_new();
+
+    /* Load config */
+    load_configfile(data);
 
     for (int i=0; i < NUM_PLAYERS; i++) {
         GtkWidget *playerUI = init_player (&data[i], i, autoconnect);
@@ -735,28 +807,8 @@ int main(int argc, char *argv[]) {
         g_io_channel_unref (io_joystick);
     }
 
-    /* Save the last folder locations to ~/.4deckradio */
-    {
-        gchar *filename = g_strdup_printf("file://%s/.4deckradio", g_get_home_dir());
-        g_print ("config file: %s\n", filename);
-        GFile *file = g_file_new_for_uri (filename);
-        GString *configstring = g_string_new("");
-        for (int i=0; i < NUM_PLAYERS; i++) {
-            g_print ("deck %i folder %s\n", i, data[i].last_folder_uri);
-            g_string_append_printf (configstring, "%s\n", data[i].last_folder_uri);
-        }
 
-        g_file_replace_contents (file,
-                configstring->str,
-                configstring->len,
-                NULL, /* old etag */
-                FALSE, /* backup */
-                G_FILE_CREATE_PRIVATE,
-                NULL, /* new etag */
-                NULL, /* cancellable */
-                NULL);
-        g_free (filename);
-    }
+    save_configfile (data);
 
     /* Free resources */
     for (int i=0; i < NUM_PLAYERS; i++) {

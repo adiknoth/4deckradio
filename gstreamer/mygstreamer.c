@@ -82,10 +82,20 @@ static inline void update_taglabel(CustomData *data, const gchar *str) {
     gtk_label_set_text (GTK_LABEL (data->taglabel), str);
 }
 
+static void wait_for_statechange(CustomData *data) {
+    GstStateChangeReturn rc = -1;
+    while ((rc != GST_STATE_CHANGE_SUCCESS) && (rc !=
+                GST_STATE_CHANGE_FAILURE)) {
+        GstState state, pending;
+        rc = gst_element_get_state(data->pipeline, &state, &pending,
+                GST_CLOCK_TIME_NONE);
+        g_print ("Wait-State is %i, pending is %i rc is %i\n", state, pending, rc);
+    }
+}
+
+
 static void maybe_load_nextfile(CustomData *data) {
     if (NULL != data->nextfile_uri) {
-        GstStateChangeReturn rc = -1;
-
         audio_stop_player (data);
         gchar *filename = g_filename_from_uri (data->nextfile_uri,
                 NULL, NULL);
@@ -94,12 +104,7 @@ static void maybe_load_nextfile(CustomData *data) {
         data->nextfile_uri = NULL;
         g_free (filename);
         audio_pause_player (data);
-        while ((rc != GST_STATE_CHANGE_SUCCESS) && (rc !=
-                                GST_STATE_CHANGE_FAILURE)) {
-                GstState state;
-                rc = gst_element_get_state(data->pipeline, &state, &state,
-                                GST_CLOCK_TIME_NONE);
-        }
+        wait_for_statechange(data);
     }
     audio_pseudo_stop(data);
 }

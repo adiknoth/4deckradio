@@ -84,7 +84,8 @@ void audio_set_uri(CustomData *data, const gchar *uri) {
 
 gboolean audio_seek(CustomData *data, gdouble value) {
     return gst_element_seek_simple (data->pipeline,
-            GST_FORMAT_TIME, GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT,
+            GST_FORMAT_TIME,
+            GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_KEY_UNIT | GST_SEEK_FLAG_SKIP,
             (gint64)(value * GST_SECOND));
 }
 

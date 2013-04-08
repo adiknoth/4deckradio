@@ -8,22 +8,29 @@ Multi-deck media playback for radio stations
 Still very early development
 
 Prerequisites:
+--------------
   * gstreamer-1.0 or 0.10 (development packages)
   * GTK-3.x (development packages)
   * [jackd](http://jackaudio.org)
   * make
 
+
 Compile:
+--------
   * For gstreamer-1.0, run
     `cd gstreamer && make`
 
   * For gstreamer-0.10, run
     `cd gstreamer && make OLDGSTREAMER=1`
     
+
 Run:
+----
     `./4deckradio`
 
+
 Usage: (rudimentary documentation)
+-----------------------------------
 
 You select a file and press play. You could also press F9 .. F12 to
 start/stop the decks. Or you own a studio surface which sends joystick

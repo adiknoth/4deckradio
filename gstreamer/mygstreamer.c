@@ -30,7 +30,7 @@ static void print_usage(char *name) {
     fprintf (stderr, "usage: %s [options]\n"
             "\n"
             "\t\t-f\tfullscreen\n"
-            "\t\t-a\tautconnect\n"
+            "\t\t-a\tautoconnect to jackd\n"
             "\t\t-h\thelp (this message)\n"
             "\n", name
             );

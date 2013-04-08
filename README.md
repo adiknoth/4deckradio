@@ -26,7 +26,12 @@ Compile:
 
 Run:
 ----
-    `./4deckradio`
+    ./4deckradio [options]
+    
+                -f      fullscreen
+                -a      autconnect
+                -h      help (this message)
+
 
 
 Usage: (rudimentary documentation)

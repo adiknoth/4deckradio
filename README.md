@@ -29,7 +29,7 @@ Run:
     ./4deckradio [options]
     
                 -f      fullscreen
-                -a      autconnect
+                -a      autoconnect to jackd
                 -h      help (this message)
 
 

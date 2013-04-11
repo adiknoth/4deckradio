@@ -73,7 +73,7 @@ AC_ARG_WITH(
 		[--with-old-gstreamer],
 		[Build against old gstreamer-0.10 (default: detect)]
 	),
-	[want_old_gstreamer=$enableval],
+	[want_old_gstreamer=$withval],
 	[want_old_gstreamer=detect]
 )
 

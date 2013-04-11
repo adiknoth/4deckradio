@@ -12,17 +12,28 @@ Prerequisites:
   * gstreamer-1.0 or 0.10 (development packages)
   * GTK-3.x (development packages)
   * [jackd](http://jackaudio.org)
-  * make
+  * make and optionally autotools
 
 
 Compile:
 --------
+There are two ways to compile 4deckradio.
+
+First, the plain and simple approach without autotools:
+
   * For gstreamer-1.0, run
-    `cd gstreamer && make`
+    `cd gstreamer && make -f Makefile.simple`
 
   * For gstreamer-0.10, run
-    `cd gstreamer && make OLDGSTREAMER=1`
+    `cd gstreamer && make OLDGSTREAMER=1 -f Makefile.simple`
+
+For packagers, there's the more sophisticated autotools-based approach:
+
+    sh ./autogen.sh
+    ./configure && make && make install
     
+You don't have to install 4deckradio, you can also run the binary from
+the build directory.
 
 Run:
 ----

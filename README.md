@@ -29,8 +29,26 @@ First, the plain and simple approach without autotools:
 
 For packagers, there's the more sophisticated autotools-based approach:
 
-    sh ./autogen.sh
-    ./configure && make && make install
+    ./autogen.sh
+    ./configure
+    
+    ./configure will automatically build against gstreamer-1.0 if it can
+    be found, else it will build against gstreamer-0.10. (If none can be
+    found it will print out a warning.)
+    
+    If you want to excplicitly specify which version of gstreamer to
+    build against you can pass --with-old-gstreamer or
+    --without-old-gstreamer to ./configure. For example:
+
+  * For gstreamer-1.0
+    ./configure --without-old-gstreamer
+
+  * For gstreamer-0.10
+    ./configure --with-old-gstreamer
+
+    Then run:
+    make
+    make install
     
 You don't have to install 4deckradio, you can also run the binary from
 the build directory.

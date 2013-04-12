@@ -32,21 +32,21 @@ For packagers, there's the more sophisticated autotools-based approach:
     ./autogen.sh
     ./configure
     
-    ./configure will automatically build against gstreamer-1.0 if it can
-    be found, else it will build against gstreamer-0.10. (If none can be
-    found it will print out a warning.)
+configure will automatically build against gstreamer-1.0 if it can
+be found, else it will build against gstreamer-0.10.
     
-    If you want to excplicitly specify which version of gstreamer to
-    build against you can pass --with-old-gstreamer or
-    --without-old-gstreamer to ./configure. For example:
+If you want to explicitly specify which version of gstreamer to build
+against you can pass `--with-old-gstreamer` or `--without-old-gstreamer` to
+configure:
 
-  * For gstreamer-1.0
-    ./configure --without-old-gstreamer
 
-  * For gstreamer-0.10
-    ./configure --with-old-gstreamer
+  * For gstreamer-1.0:
+    `./configure --without-old-gstreamer`
 
-    Then run:
+  * For gstreamer-0.10:
+    `./configure --with-old-gstreamer`
+
+Then run:
     make
     make install
     

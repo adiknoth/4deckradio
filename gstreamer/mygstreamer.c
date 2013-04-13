@@ -9,10 +9,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <getopt.h>
 #include <fcntl.h>
 
 
+#include <glib.h>
+#include <glib/gprintf.h>
 #include <gtk/gtk.h>
 #include <gst/gst.h>
 
@@ -29,17 +30,6 @@
 #include "audio.h"
 
 #define NUM_PLAYERS 4
-
-static void print_usage(char *name) {
-    fprintf (stderr, "usage: %s [options]\n"
-            "\n"
-            "\t\t-f\tfullscreen\n"
-            "\t\t-a\tautoconnect to jackd\n"
-            "\t\t-h\thelp (this message)\n"
-            "\n", name
-            );
-
-}
 
 static void get_tag(GstTagList *tags, const gchar *tag, gchar **target) {
         if (TRUE != gst_tag_list_get_string (tags, tag, target)) {
@@ -721,42 +711,29 @@ int main(int argc, char *argv[]) {
     GtkWidget *main_window;
     GtkWidget *main_grid;
     GIOChannel *io_joystick;
+    GError *error = NULL;
 
-    extern char *optarg;
-    extern int optind, optopt;
-    gboolean show_usage = FALSE;
     gboolean fullscreen = FALSE;
     int autoconnect = 0;
-    int c;
 
-    while ((c = getopt(argc, argv, "hfa")) != -1) {
-        switch(c) {
-            case 'h':
-                show_usage = TRUE;
-                break;
-            case 'f':
-                fullscreen = TRUE;
-                break;
-            case 'a':
-                autoconnect = 1;
-                break;
-            case '?':
-                fprintf(stderr,
-                        "Unrecognized option: -%c\n", optopt);
-                show_usage = TRUE;
-                break;
-        }
-    }
-
-    if (TRUE == show_usage) {
-        print_usage(argv[0]);
-        exit(2);
-    }
-
-
+    GOptionEntry option_entries[] = {
+        { "fullscreen", 'f', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE,
+            &fullscreen, "Fullscreen", NULL },
+        { "autoconnect", 'a', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE,
+            &autoconnect, "Autoconnect to jackd", NULL },
+        { NULL, ' ', 0, 0, NULL, NULL, NULL }
+    };
 
     /* Initialize GTK */
-    gtk_init (&argc, &argv);
+    if ( gtk_init_with_args (&argc, &argv, NULL, option_entries, NULL, &error) != TRUE )
+    {
+        if (error != NULL) {
+            g_fprintf(stderr, "%s\nTry --help to see a full list of available command line options.\n",
+                error->message);
+            g_error_free(error);
+        }
+        return 1;
+    }
 
     /* Initialize GStreamer */
     gst_init (&argc, &argv);

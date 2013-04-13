@@ -115,7 +115,7 @@ cannot be found.])
 AM_CONDITIONAL([WITH_OLD_GSTREAMER], [test x$with_old_gstreamer = xyes])
 
 # Checks for header files.
-AC_CHECK_HEADERS([fcntl.h getopt.h stdint.h stdio.h stdlib.h string.h sys/stat.h sys/types.h unistd.h])
+AC_CHECK_HEADERS([fcntl.h stdint.h stdio.h stdlib.h string.h sys/stat.h sys/types.h unistd.h])
 
 # Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

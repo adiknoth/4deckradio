@@ -55,11 +55,11 @@ the build directory.
 
 Run:
 ----
-    ./4deckradio [options]
+    ./4deckradio [OPTION...]
     
-                -f      fullscreen
-                -a      autoconnect to jackd
-                -h      help (this message)
+        -f, --fullscreen        Fullscreen
+        -a, --autoconnect       Autoconnect to jackd
+        -h, --help              Show help options
 
 
 

@@ -598,7 +598,6 @@ static gchar* make_silence(void) {
                 0x00, 0x00};
         GError *error = NULL;
         gchar *tmpfilename;
-        gchar *ret;
         GIOChannel *outfile;
         gsize bytes_written;
 

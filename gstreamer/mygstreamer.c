@@ -366,7 +366,7 @@ static void tags_cb (GstElement *pipeline, gint stream, CustomData *data) {
      * thread of this event through a message in the bus */
     gst_element_post_message (pipeline,
             gst_message_new_application (GST_OBJECT (pipeline),
-                gst_structure_new ("tags-changed", NULL)));
+                gst_structure_new ("tags-changed", NULL, NULL)));
 }
 
 /* This function is called when an error message is posted on the bus */
@@ -598,7 +598,6 @@ static gchar* make_silence(void) {
                 0x00, 0x00};
         GError *error = NULL;
         gchar *tmpfilename;
-        gchar *ret;
         GIOChannel *outfile;
         gsize bytes_written;
 
@@ -619,7 +618,7 @@ static gchar* make_silence(void) {
                 return dummyuri();
         }
 
-        g_print ("File is %d\n", sizeof(*silentwave));
+        g_print ("File is %lu\n", sizeof(*silentwave));
 
         g_clear_error (&error);
         if (G_IO_STATUS_NORMAL != g_io_channel_write_chars (outfile, &silentwave[0], sizeof(silentwave), &bytes_written, &error)) {

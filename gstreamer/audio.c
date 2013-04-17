@@ -103,8 +103,6 @@ void audio_pseudo_stop(CustomData *data) {
 }
 
 int init_audio(CustomData *data, guint decknumber, int autoconnect) {
-    GstStateChangeReturn ret;
-
     data->duration = GST_CLOCK_TIME_NONE;
 
     /* Create the elements */

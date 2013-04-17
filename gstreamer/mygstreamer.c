@@ -619,7 +619,7 @@ static gchar* make_silence(void) {
                 return dummyuri();
         }
 
-        g_print ("File is %d\n", sizeof(*silentwave));
+        g_print ("File is %lu\n", sizeof(*silentwave));
 
         g_clear_error (&error);
         if (G_IO_STATUS_NORMAL != g_io_channel_write_chars (outfile, &silentwave[0], sizeof(silentwave), &bytes_written, &error)) {

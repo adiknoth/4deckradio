@@ -366,7 +366,7 @@ static void tags_cb (GstElement *pipeline, gint stream, CustomData *data) {
      * thread of this event through a message in the bus */
     gst_element_post_message (pipeline,
             gst_message_new_application (GST_OBJECT (pipeline),
-                gst_structure_new ("tags-changed", NULL)));
+                gst_structure_new ("tags-changed", NULL, NULL)));
 }
 
 /* This function is called when an error message is posted on the bus */

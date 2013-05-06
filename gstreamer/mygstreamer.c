@@ -126,6 +126,17 @@ static void file_selection_cb (GtkFileChooser *chooser, CustomData *data) {
         return;
     }
 
+    if (g_str_has_suffix (fileName, ".m3u")) {
+        gchar *content;
+        g_printf ("m3u selected\n");
+        if (!g_file_get_contents (fileName, &content, NULL, NULL)) {
+            /* error reading m3u, just do nothing */
+            return;
+        }
+        fileURI = g_strstrip(g_strdup (content));
+        g_free (content);
+    }
+
     if (audio_is_playing(data)) {
             /* Don't load the file, only store its filename in
              * data->nextfile_uri, so it is loaded when the pipe finishes

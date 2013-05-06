@@ -220,8 +220,9 @@ static GtkWidget* _create_media_button (const gchar *stockid) {
 }
 
 /* This creates all the GTK+ widgets that compose our application, and registers the callbacks */
-static GtkWidget* create_player_ui (CustomData *data) {
+static GtkWidget* create_player_ui (CustomData *data, guint decknumber) {
     GtkWidget *stop_button; /* Buttons */
+    GtkWidget *title;
     GtkWidget *myGrid;
 
 
@@ -267,9 +268,16 @@ static GtkWidget* create_player_ui (CustomData *data) {
         g_signal_handler_block (data->filechooser, data->file_selection_signal_id);
     }
 
+    {
+        gchar *titlename = g_strdup_printf ("Deck %u\n", decknumber + 1);
+        title = gtk_label_new (titlename);
+        g_free (titlename);
+    }
+
 
     /* arrange all elements into myGrid */
     gtk_grid_attach (GTK_GRID (myGrid), data->filechooser, 0, 0, 1, 3);
+    gtk_grid_attach_next_to (GTK_GRID (myGrid), title, data->filechooser, GTK_POS_TOP, 1, 3);
     gtk_grid_attach_next_to (GTK_GRID (myGrid), data->playPauseButton, data->filechooser, GTK_POS_RIGHT, 1, 1);
     gtk_grid_attach_next_to (GTK_GRID (myGrid), stop_button, data->playPauseButton, GTK_POS_BOTTOM, 1, 1);
 
@@ -476,7 +484,7 @@ static GtkWidget* init_player(CustomData *data, guint decknumber, int autoconnec
     init_audio(data, decknumber, autoconnect);
 
     /* Create the GUI */
-    playerUI = create_player_ui (data);
+    playerUI = create_player_ui (data, decknumber);
 
     /* Instruct the bus to emit signals for each received message, and connect to the interesting signals */
     bus = gst_element_get_bus (data->pipeline);

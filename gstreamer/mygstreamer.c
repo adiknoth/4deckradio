@@ -100,7 +100,12 @@ static void maybe_load_nextfile(CustomData *data) {
         audio_pause_player (data);
         wait_for_statechange(data);
     }
-    audio_pseudo_stop(data);
+
+    if (data->is_network_stream) {
+        audio_stop_player(data);
+    } else {
+        audio_pseudo_stop(data);
+    }
 }
 
 
@@ -332,7 +337,10 @@ static gboolean refresh_ui (CustomData *data) {
         } else {
             /* Set the range of the slider to the clip duration, in SECONDS */
             g_signal_handler_block (data->slider, data->slider_update_signal_id);
-            gtk_range_set_range (GTK_RANGE (data->slider), 0, (gdouble)data->duration / GST_SECOND);
+            if (!data->is_network_stream) {
+                gtk_range_set_range (GTK_RANGE (data->slider), 0,
+                                (gdouble)data->duration / GST_SECOND);
+            }
             g_signal_handler_unblock (data->slider, data->slider_update_signal_id);
         }
     }
@@ -347,7 +355,9 @@ static gboolean refresh_ui (CustomData *data) {
          * (which would trigger a seek the user has not requested) */
         g_signal_handler_block (data->slider, data->slider_update_signal_id);
         /* Set the position of the slider to the current pipeline positoin, in SECONDS */
-        gtk_range_set_value (GTK_RANGE (data->slider), (gdouble)current / GST_SECOND);
+        if (!data->is_network_stream) {
+            gtk_range_set_value (GTK_RANGE (data->slider), (gdouble)current / GST_SECOND);
+        }
         /* Re-enable the signal */
         g_signal_handler_unblock (data->slider, data->slider_update_signal_id);
         {

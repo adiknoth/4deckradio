@@ -82,6 +82,7 @@ static GstElement* create_gst_element (const gchar *what, const gchar *name) {
 }
 
 void audio_set_uri(CustomData *data, const gchar *uri) {
+    data->is_network_stream = g_str_has_prefix(uri, "http://");
     g_object_set (data->uridecodebin, "uri", uri, NULL);
     data->duration = GST_CLOCK_TIME_NONE;
 }

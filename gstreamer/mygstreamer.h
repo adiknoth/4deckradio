@@ -39,6 +39,7 @@ typedef struct _CustomData {
 
     GstState state;                 /* Current state of the pipeline */
     gint64 duration;                /* Duration of the clip, in nanoseconds */
+    gboolean is_network_stream;	    /* Current URI might not be a local file */
 } CustomData;
 
 #endif /* _MYGSTREAMER_H */

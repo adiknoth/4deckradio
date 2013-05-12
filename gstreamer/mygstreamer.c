@@ -396,6 +396,7 @@ static void error_cb (GstBus *bus, GstMessage *msg, CustomData *data) {
     /* Print error details on the screen */
     gst_message_parse_error (msg, &err, &debug_info);
     g_printerr ("Error received from element %s: %s\n", GST_OBJECT_NAME (msg->src), err->message);
+    update_timelabel (data, err->message);
     g_printerr ("Debugging information: %s\n", debug_info ? debug_info : "none");
     g_clear_error (&err);
     g_free (debug_info);

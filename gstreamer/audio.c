@@ -103,6 +103,32 @@ void audio_pseudo_stop(CustomData *data) {
     audio_pause_player (data);
 }
 
+static gboolean link_elements_with_filter (GstElement *element1, GstElement *element2) {
+    gboolean link_ok;
+    GstCaps *caps;
+
+    caps = gst_caps_new_simple (
+#if GST_VERSION_MAJOR == (0)
+            "audio/x-raw-float",
+#else
+            "audio/x-raw",
+#endif
+            "channels", G_TYPE_INT, 2,
+            NULL);
+
+    link_ok = gst_element_link_filtered (element1, element2, caps);
+    gst_caps_unref (caps);
+
+    if (!link_ok) {
+        g_warning ("Failed to link %s to %s",
+                GST_ELEMENT_NAME (element1),
+                GST_ELEMENT_NAME (element2));
+    }
+
+    return link_ok;
+}
+
+
 int init_audio(CustomData *data, guint decknumber, int autoconnect) {
     data->duration = GST_CLOCK_TIME_NONE;
 
@@ -141,9 +167,14 @@ Enum "GstJackConnect" Default: 1, "auto"
         g_object_set (data->jackaudiosink, "connect", autoconnect, NULL);
     }
 
-    if (TRUE != gst_element_link_many (data->audioconvert,
-                data->audioresample, data->jackaudiosink, NULL)) {
+    if (TRUE != gst_element_link_many (data->audioresample, data->jackaudiosink, NULL)) {
         g_printerr ("Problems linking bins\n");
+        exit (1);
+    }
+
+    /* Force the pipe to stereo */
+    if (TRUE != link_elements_with_filter (data->audioconvert,
+                data->audioresample)) {
         exit (1);
     }
 

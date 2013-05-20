@@ -31,6 +31,10 @@
 
 #define NUM_PLAYERS 4
 
+gchar *green = "green";        /* Colour to be used for "green" timelabel */
+gchar *yellow = "yellow";      /* Colour to be used for "yellow" timelabel */
+gchar *red = "red";            /* Colour to be used for "red" timelabel */
+
 static void get_tag(GstTagList *tags, const gchar *tag, gchar **target) {
         if (TRUE != gst_tag_list_get_string (tags, tag, target)) {
             *target = g_strdup_printf ("Unknown");
@@ -374,12 +378,12 @@ static gboolean refresh_ui (CustomData *data) {
             } else {
                 if (remaining < 0.5 * data->duration) {
                     if (remaining < 0.25 * data->duration) {
-                        update_timelabel_bg (data, time, "red");
+                        update_timelabel_bg (data, time, red);
                     } else {
-                        update_timelabel_bg (data, time, "yellow");
+                        update_timelabel_bg (data, time, yellow);
                     }
                 } else {
-                    update_timelabel_bg (data, time, "green");
+                    update_timelabel_bg (data, time, green);
                 }
             }
 
@@ -750,6 +754,12 @@ int main(int argc, char *argv[]) {
             &fullscreen, "Fullscreen", NULL },
         { "autoconnect", 'a', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_NONE,
             &autoconnect, "Autoconnect to jackd", NULL },
+        { "green", 'g', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_STRING,
+            &green, "Background colour until 50\% elapsed", "#00ff00" },
+        { "yellow", 'y', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_STRING,
+            &yellow, "Background colour until 75\% elapsed", "#ffff00" },
+        { "red", 'r', G_OPTION_FLAG_IN_MAIN, G_OPTION_ARG_STRING,
+            &red, "Background colour until 100\% elapsed", "#ff0000" },
         { NULL, ' ', 0, 0, NULL, NULL, NULL }
     };
 

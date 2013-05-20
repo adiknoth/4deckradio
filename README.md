@@ -59,6 +59,9 @@ Run:
     
         -f, --fullscreen        Fullscreen
         -a, --autoconnect       Autoconnect to jackd
+        -g, --green=#00ff00     Background colour until 50% elapsed
+        -y, --yellow=#ffff00    Background colour until 75% elapsed
+        -r, --red=#ff0000       Background colour until 100% elapsed
         -h, --help              Show help options
 
 
